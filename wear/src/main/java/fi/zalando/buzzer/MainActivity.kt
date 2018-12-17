@@ -15,6 +15,7 @@ import java.util.*
 
 class MainActivity : WearableActivity() {
 
+    private var tts: TextToSpeech? = null
     private var nodes: Set<Node>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,15 +86,20 @@ class MainActivity : WearableActivity() {
         }
     }
 
-    var tts: TextToSpeech? = null
     private fun playMessage(message: String) {
-        tts = TextToSpeech(this, TextToSpeech.OnInitListener { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                tts?.run {
-                    language = Locale.US
-                    speak(message, TextToSpeech.QUEUE_FLUSH, null)
+        if (tts == null) {
+            tts = TextToSpeech(this, TextToSpeech.OnInitListener { status ->
+                if (status == TextToSpeech.SUCCESS) {
+                    tts?.run {
+                        language = Locale.US
+                        speak(message, TextToSpeech.QUEUE_FLUSH, null)
+                    }
+                } else {
+                    tts = null
                 }
-            }
-        })
+            })
+        } else {
+            tts?.speak(message, TextToSpeech.QUEUE_FLUSH, null)
+        }
     }
 }
