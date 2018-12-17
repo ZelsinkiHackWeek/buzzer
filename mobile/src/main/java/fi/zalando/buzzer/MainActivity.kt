@@ -3,6 +3,7 @@ package fi.zalando.buzzer
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.wearable.CapabilityClient
@@ -13,14 +14,17 @@ import com.google.android.gms.wearable.Wearable
 class MainActivity : AppCompatActivity() {
 
     private var nodes: Set<Node>? = null
+    private lateinit var editText: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        editText = findViewById(R.id.edit_text)
         initConnectivity()
         findViewById<Button>(R.id.button).apply {
             setOnClickListener {
-                sendMessage()
+                sendMessage(editText.text.toString().trim())
+                editText.setText("")
             }
         }
     }
@@ -46,10 +50,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun sendMessage() {
+    private fun sendMessage(message: String) {
         nodes?.firstOrNull()?.id?.let { id ->
             Wearable.getMessageClient(this).sendMessage(
-                id, "message", "Hello from mobile".toByteArray()
+                id, "message", message.toByteArray()
             )
         }
     }

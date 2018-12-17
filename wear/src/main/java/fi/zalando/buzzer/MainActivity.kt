@@ -3,6 +3,7 @@ package fi.zalando.buzzer
 import android.content.Intent
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.speech.tts.TextToSpeech
 import android.support.wearable.activity.WearableActivity
 import android.util.Log
 import android.widget.Button
@@ -10,6 +11,7 @@ import android.widget.Toast
 import com.google.android.gms.wearable.CapabilityClient
 import com.google.android.gms.wearable.Node
 import com.google.android.gms.wearable.Wearable
+import java.util.*
 
 class MainActivity : WearableActivity() {
 
@@ -43,7 +45,9 @@ class MainActivity : WearableActivity() {
         Wearable.getMessageClient(this).addListener { messageEvent ->
             when (messageEvent.path) {
                 "message" -> {
-                    Toast.makeText(this, "message " + String(messageEvent.data), Toast.LENGTH_LONG).show()
+                    val message = String(messageEvent.data)
+                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                    playMessage(message)
                 }
             }
         }
@@ -79,5 +83,17 @@ class MainActivity : WearableActivity() {
                 }
             }
         }
+    }
+
+    var tts: TextToSpeech? = null
+    private fun playMessage(message: String) {
+        tts = TextToSpeech(this, TextToSpeech.OnInitListener { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                tts?.run {
+                    language = Locale.US
+                    speak(message, TextToSpeech.QUEUE_FLUSH, null)
+                }
+            }
+        })
     }
 }
