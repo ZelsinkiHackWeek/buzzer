@@ -5,12 +5,16 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
+import android.util.Log
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.gms.wearable.CapabilityClient
+import com.google.android.gms.wearable.Node
+import com.google.android.gms.wearable.Wearable
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -21,11 +25,19 @@ class MainActivity : AppCompatActivity() {
 
     private var map: Map<String, BluetoothDevice> = mutableMapOf()
 
+    private var nodes: Set<Node>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initBluetooth()
+        initConnectivity()
+        findViewById<Button>(R.id.button).apply {
+            setOnClickListener {
+                sendMessage(edit_text_wear.text.toString().trim())
+                edit_text_wear.setText("")
+            }
+        }
         button_host.setOnClickListener {
             viewModel.connectAsServer(bluetoothAdapter!!)
         }
@@ -93,6 +105,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun initConnectivity() {
+        val capabilityInfoTask = Wearable.getCapabilityClient(this)
+            .getCapability("watch_client", CapabilityClient.FILTER_ALL)
+
+        capabilityInfoTask.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                nodes = task.result?.nodes
+            } else {
+                Log.d("FAIL", "Capability request failed to return any results.")
+            }
+        }
+
+        Wearable.getMessageClient(this).addListener { messageEvent ->
+            when (messageEvent.path) {
+                "message" -> {
+                    Toast.makeText(this, "message " + String(messageEvent.data), Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == 111 && resultCode == Activity.RESULT_OK) {
             button_host.isEnabled = true
@@ -100,6 +133,14 @@ class MainActivity : AppCompatActivity() {
         } else {
             button_host.isEnabled = true
             button_join.isEnabled = true
+        }
+    }
+
+    private fun sendMessage(message: String) {
+        nodes?.firstOrNull()?.id?.let { id ->
+            Wearable.getMessageClient(this).sendMessage(
+                id, "message", message.toByteArray()
+            )
         }
     }
 
@@ -112,10 +153,4 @@ const val MESSAGE_WRITE: Int = 1
 const val MESSAGE_TOAST: Int = 2
 // ... (Add other message types here as needed.)
 
-class MyBluetoothService(
-    // handler that gets info from Bluetooth service
-    private val mHandler: Handler
-) {
-
-}
 
