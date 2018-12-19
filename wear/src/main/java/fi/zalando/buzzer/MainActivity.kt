@@ -5,9 +5,10 @@ import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
 import android.support.wearable.activity.WearableActivity
+import android.text.Html
 import android.util.Log
 import android.widget.Button
-import android.widget.Toast
+import android.widget.TextView
 import com.google.android.gms.wearable.CapabilityClient
 import com.google.android.gms.wearable.Node
 import com.google.android.gms.wearable.Wearable
@@ -25,6 +26,10 @@ class MainActivity : WearableActivity() {
         setAmbientEnabled()
         initConnectivity()
         findViewById<Button>(R.id.button).apply {
+            /*setOnLongClickListener {
+                playMessage(message)
+                true
+            }*/
             setOnClickListener {
                 recordSpeech()
             }
@@ -47,8 +52,9 @@ class MainActivity : WearableActivity() {
             when (messageEvent.path) {
                 "message" -> {
                     val message = String(messageEvent.data)
-                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-                    playMessage(message)
+                    findViewById<TextView>(R.id.question).apply {
+                        text = Html.fromHtml(message)
+                    }
                 }
             }
         }

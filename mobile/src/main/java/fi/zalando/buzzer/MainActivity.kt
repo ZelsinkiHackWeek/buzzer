@@ -9,12 +9,21 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.wearable.CapabilityClient
 import com.google.android.gms.wearable.Node
 import com.google.android.gms.wearable.Wearable
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 
 class MainActivity : AppCompatActivity() {
 
     private var nodes: Set<Node>? = null
     private lateinit var editText: EditText
+    private var currentQuestion: Int = 0
+    private var questions: List<TriviaQuestion>? = null
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +36,7 @@ class MainActivity : AppCompatActivity() {
                 editText.setText("")
             }
         }
+        getQuestions()
     }
 
     private fun initConnectivity() {
@@ -44,10 +54,41 @@ class MainActivity : AppCompatActivity() {
         Wearable.getMessageClient(this).addListener { messageEvent ->
             when (messageEvent.path) {
                 "message" -> {
-                    Toast.makeText(this, "message " + String(messageEvent.data), Toast.LENGTH_LONG).show()
+                    val answer = String(messageEvent.data).run {
+                        contains("true") || contains("yes") || contains("correct")
+                    }
+                    if (questions!![currentQuestion].correct_answer == answer) {
+                        Toast.makeText(this, "Correct!", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(this, "Nope!", Toast.LENGTH_LONG).show()
+                    }
+                    currentQuestion++
+                    sendMessage(questions!![currentQuestion].question)
                 }
             }
         }
+    }
+
+    private fun getQuestions() {
+        val retrofit = Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl("https://opentdb.com/api.php/")
+            .build()
+
+        val triviaService = retrofit.create(TriviaService::class.java)
+        triviaService.getQuestions().enqueue(object: Callback<TriviaResponse> {
+            override fun onResponse(call: Call<TriviaResponse>, response: Response<TriviaResponse>) {
+                response.body()?.results?.run {
+                    questions = this
+                    currentQuestion = 0
+                    sendMessage(questions!![currentQuestion].question)
+                }
+            }
+
+            override fun onFailure(call: Call<TriviaResponse>, t: Throwable) {
+                t.printStackTrace()
+            }
+        })
     }
 
     private fun sendMessage(message: String) {

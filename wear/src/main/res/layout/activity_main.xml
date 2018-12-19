@@ -11,18 +11,27 @@
         tools:deviceIds="wear"
         android:padding="@dimen/box_inset_layout_padding">
 
-    <FrameLayout
+    <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="@dimen/inner_frame_layout_padding"
             app:boxedEdges="all">
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="vertical">
 
-        <Button
-                android:id="@+id/button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Send Message"/>
+            <TextView
+                    android:id="@+id/question"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"/>
 
-    </FrameLayout>
+            <Button
+                    android:id="@+id/button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Send Message"/>
+        </LinearLayout>
+
+    </ScrollView>
 </androidx.wear.widget.BoxInsetLayout>
