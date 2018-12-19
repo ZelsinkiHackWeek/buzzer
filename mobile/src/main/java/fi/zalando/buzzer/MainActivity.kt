@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
-import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -16,12 +15,12 @@ import androidx.lifecycle.ViewModelProviders
 import com.google.android.gms.wearable.CapabilityClient
 import com.google.android.gms.wearable.Node
 import com.google.android.gms.wearable.Wearable
+import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -32,7 +31,6 @@ class MainActivity : AppCompatActivity() {
     private var map: Map<String, BluetoothDevice> = mutableMapOf()
 
     private var nodes: Set<Node>? = null
-    private lateinit var editText: EditText
     private var currentQuestion: Int = 0
     private var questions: List<TriviaQuestion>? = null
 
