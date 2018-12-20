@@ -35,7 +35,6 @@ class MainActivity : AppCompatActivity() {
     private var questions: List<TriviaQuestion>? = null
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -131,7 +130,9 @@ class MainActivity : AppCompatActivity() {
             when (messageEvent.path) {
                 "message" -> {
                     val answer = String(messageEvent.data).run {
-                        contains("true") || contains("yes") || contains("correct")
+                        contains("true", true)
+                                || contains("yes", true)
+                                || contains("correct", true)
                     }
                     if (questions!![currentQuestion].correct_answer == answer) {
                         Toast.makeText(this, "Correct!", Toast.LENGTH_LONG).show()
@@ -152,7 +153,7 @@ class MainActivity : AppCompatActivity() {
             .build()
 
         val triviaService = retrofit.create(TriviaService::class.java)
-        triviaService.getQuestions().enqueue(object: Callback<TriviaResponse> {
+        triviaService.getQuestions().enqueue(object : Callback<TriviaResponse> {
             override fun onResponse(call: Call<TriviaResponse>, response: Response<TriviaResponse>) {
                 response.body()?.results?.run {
                     questions = this
