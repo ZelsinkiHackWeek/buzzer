@@ -56,6 +56,10 @@ class MainActivity : WearableActivity() {
                         text = Html.fromHtml(message)
                     }
                 }
+                "play" -> {
+                    val message = String(messageEvent.data)
+                    playMessage(message)
+                }
             }
         }
     }

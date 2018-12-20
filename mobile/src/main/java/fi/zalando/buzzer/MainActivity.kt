@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         initConnectivity()
         findViewById<Button>(R.id.button).apply {
             setOnClickListener {
-                sendMessage(edit_text_wear.text.toString().trim())
+                sendMessage("play", edit_text_wear.text.toString().trim())
                 edit_text_wear.setText("")
             }
         }
@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(this, "Nope!", Toast.LENGTH_LONG).show()
                     }
                     currentQuestion++
-                    sendMessage(questions!![currentQuestion].question)
+                    sendMessage("message", questions!![currentQuestion].question)
                 }
             }
         }
@@ -158,7 +158,7 @@ class MainActivity : AppCompatActivity() {
                 response.body()?.results?.run {
                     questions = this
                     currentQuestion = 0
-                    sendMessage(questions!![currentQuestion].question)
+                    sendMessage("message", questions!![currentQuestion].question)
                 }
             }
 
@@ -178,10 +178,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun sendMessage(message: String) {
+    private fun sendMessage(type: String, message: String) {
         nodes?.firstOrNull()?.id?.let { id ->
             Wearable.getMessageClient(this).sendMessage(
-                id, "message", message.toByteArray()
+                id, type, message.toByteArray()
             )
         }
     }
